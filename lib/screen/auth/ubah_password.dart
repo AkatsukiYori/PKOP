@@ -14,14 +14,14 @@ class Pengguna {
   }
 }
 
-class PengaturanWidget extends StatefulWidget {
-  const PengaturanWidget({super.key});
+class UbahPasswordWidget extends StatefulWidget {
+  const UbahPasswordWidget({super.key});
 
   @override
-  State<PengaturanWidget> createState() => _PengaturanWidgetState();
+  State<UbahPasswordWidget> createState() => _UbahPasswordWidgetState();
 }
 
-class _PengaturanWidgetState extends State<PengaturanWidget> {
+class _UbahPasswordWidgetState extends State<UbahPasswordWidget> {
   late Future<Pengguna> futurePengguna;
   Future<int?> getPenggunaIdFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
@@ -42,10 +42,10 @@ class _PengaturanWidgetState extends State<PengaturanWidget> {
     }
   }
 
-  final TextEditingController _namaPenggunaController = TextEditingController();
-  final TextEditingController _emailPenggunaController =
+  final TextEditingController _oldPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmationPasswordController =
       TextEditingController();
-  final TextEditingController _noHpPenggunaController = TextEditingController();
 
   bool _isLoading = false;
   String _message = '';
@@ -63,14 +63,14 @@ class _PengaturanWidgetState extends State<PengaturanWidget> {
     });
 
     final url = Uri.parse(
-      'http://localhost/backend_project_rpl/crud/update_profile.php',
+      'http://localhost/backend_project_rpl/crud/ubah_password.php',
     );
     final response = await http.post(
       url,
       body: jsonEncode({
-        "username": _namaPenggunaController.text,
-        "email": _emailPenggunaController.text,
-        "nomor_hp": _noHpPenggunaController.text,
+        "oldPassword": _oldPasswordController.text,
+        "newPassword": _newPasswordController.text,
+        "confirmationPassword": _confirmationPasswordController.text,
         "id": id.toString(),
       }),
     );
@@ -87,7 +87,7 @@ class _PengaturanWidgetState extends State<PengaturanWidget> {
         if (data['status'] == true) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Update profile berhasil')));
+          ).showSnackBar(SnackBar(content: Text('Update password berhasil')));
         } else {
           ScaffoldMessenger.of(
             context,
@@ -128,7 +128,7 @@ class _PengaturanWidgetState extends State<PengaturanWidget> {
       appBar: AppBar(
         backgroundColor: Color(0xFFFFFFFF),
         title: Text(
-          'Ubah Profile',
+          'Ubah Password',
           style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -145,15 +145,27 @@ class _PengaturanWidgetState extends State<PengaturanWidget> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Ganti Nama Pengguna',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Password lama',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          ' *',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 5),
                     TextField(
-                      controller: _namaPenggunaController,
+                      controller: _oldPasswordController,
                       decoration: InputDecoration(
-                        hintText: 'Masukan nama pengguna',
+                        hintText: 'Masukan password lama',
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide(color: Colors.black),
@@ -170,15 +182,27 @@ class _PengaturanWidgetState extends State<PengaturanWidget> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Ganti Email Tertaut',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Password baru',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          ' *',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 5),
                     TextField(
-                      controller: _emailPenggunaController,
+                      controller: _newPasswordController,
                       decoration: InputDecoration(
-                        hintText: 'Masukan email tertaut',
+                        hintText: 'Masukan password baru',
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide(color: Colors.black),
@@ -195,15 +219,27 @@ class _PengaturanWidgetState extends State<PengaturanWidget> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Ganti Nomor Handphone',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Konfirmasi password',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          ' *',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 5),
                     TextField(
-                      controller: _noHpPenggunaController,
+                      controller: _confirmationPasswordController,
                       decoration: InputDecoration(
-                        hintText: 'Masukan nomor handphone',
+                        hintText: 'Konfirmasi password',
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide(color: Colors.black),

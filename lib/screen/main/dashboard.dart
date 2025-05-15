@@ -1,11 +1,10 @@
 import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:project_rpl/screen/main/history.dart';
 
 class Pengguna {
   final String username;
@@ -24,6 +23,7 @@ class Transaksi {
   final int? nominal;
   final String? tanggal;
   final String? jenis_transaksi;
+  final bool? limit;
 
   Transaksi({
     this.judul_transaksi,
@@ -31,6 +31,7 @@ class Transaksi {
     this.nominal,
     this.tanggal,
     this.jenis_transaksi,
+    this.limit,
   });
 
   factory Transaksi.fromJson(Map<String, dynamic> json) {
@@ -40,6 +41,7 @@ class Transaksi {
       nominal: json['nominal'],
       tanggal: json['tanggal'],
       jenis_transaksi: json['jenis_transaksi'],
+      limit: true,
     );
   }
 }
@@ -81,7 +83,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
     final response = await http.get(
       Uri.parse(
-        'http://localhost/backend_project_rpl/select/get_limit_transaksi.php?id=$pengguna_id',
+        'http://localhost/backend_project_rpl/select/get_transaksi.php?id=$pengguna_id&limit=true',
       ),
     );
 
@@ -101,7 +103,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     }
   }
 
-  Future<Map<String, dynamic>> getCombineData() async {
+  Stream<Map<String, dynamic>> getCombineData(Duration interval) async* {
     final pengguna_id = await getPenggunaIdFromPrefs();
     if (pengguna_id == null) {
       throw Exception('ID tidak ditemukan');
@@ -109,7 +111,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
     final pengguna = await fetchPengguna(pengguna_id);
     final transaksi = await fetchTransaksi(pengguna_id);
-    return {'pengguna': pengguna, 'transaksi': transaksi};
+    yield {'pengguna': pengguna, 'transaksi': transaksi};
   }
 
   @override
@@ -119,13 +121,11 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       if (id == null) throw Exception('ID tidak ditemukan');
       return fetchPengguna(id);
     });
-
-    combineFuture = getCombineData();
   }
 
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: combineFuture,
+    return StreamBuilder<Map<String, dynamic>>(
+      stream: getCombineData(Duration(seconds: 1)),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -153,6 +153,10 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                           decoration: BoxDecoration(
                             color: Colors.grey[100],
                             borderRadius: BorderRadius.circular(100),
+                            image: DecorationImage(
+                              image: AssetImage('assets/images/profile.jpeg'),
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                         Padding(
@@ -271,7 +275,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                       transaksiList.isEmpty
                           ? Text(
                             'Tidak ada transaksi',
-                            style: TextStyle(fontSize: 22),
+                            style: TextStyle(fontSize: 18),
                           )
                           : Column(
                             children: [
@@ -288,6 +292,10 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                     (trx.jenis_transaksi == 'pemasukan'
                                         ? Icons.add
                                         : Icons.horizontal_rule);
+                                final textColor =
+                                    (trx.jenis_transaksi == 'pemasukan'
+                                        ? Colors.green
+                                        : Colors.redAccent);
 
                                 return Padding(
                                   padding: EdgeInsets.symmetric(
@@ -336,35 +344,42 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 15,
-                                          color: Colors.redAccent,
+                                          color: textColor,
                                         ),
                                       ),
                                     ),
                                   ),
                                 );
                               }).toList(),
+                              Padding(
+                                padding: EdgeInsets.symmetric(vertical: 10),
+                                child: TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => HistoryWidget(),
+                                      ),
+                                    );
+                                  },
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: Color(0xFF4C75FF),
+                                    fixedSize: Size(180, 40),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Lihat Semua',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Color(0xFFF9FCFF),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: TextButton(
-                          onPressed: () {},
-                          style: TextButton.styleFrom(
-                            backgroundColor: Color(0xFF4C75FF),
-                            fixedSize: Size(180, 40),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
-                          child: Text(
-                            'Lihat Semua',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFFF9FCFF),
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),

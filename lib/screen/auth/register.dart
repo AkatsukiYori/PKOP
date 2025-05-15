@@ -25,7 +25,9 @@ class _RegisterWidgetState extends State<RegisterWidget> {
       _message = '';
     });
 
-    final url = Uri.parse('http://localhost/backend_project_rpl/auth/register.php');
+    final url = Uri.parse(
+      'http://localhost/backend_project_rpl/auth/register.php',
+    );
 
     final response = await http.post(
       url,
@@ -119,8 +121,14 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.person, color: Colors.grey[600]),
                   labelText: 'Email',
+                  labelStyle: TextStyle(color: Colors.black),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Color(0xFF4C75FF)),
                   ),
                 ),
               ),
@@ -130,8 +138,14 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.person, color: Colors.grey[600]),
                   labelText: 'Username',
+                  labelStyle: TextStyle(color: Colors.black),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Color(0xFF4C75FF)),
                   ),
                 ),
               ),
@@ -141,8 +155,14 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.key, color: Colors.grey[600]),
                   labelText: 'Password',
+                  labelStyle: TextStyle(color: Colors.black),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Color(0xFF4C75FF)),
                   ),
                 ),
               ),

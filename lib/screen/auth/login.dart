@@ -137,8 +137,14 @@ class _LoginWidgetState extends State<LoginWidget> {
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.person, color: Colors.grey[600]),
                   labelText: 'Username',
+                  labelStyle: TextStyle(color: Colors.black),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Color(0xFF4C75FF)),
                   ),
                 ),
               ),
@@ -150,8 +156,14 @@ class _LoginWidgetState extends State<LoginWidget> {
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.key, color: Colors.grey[600]),
                   labelText: 'Password',
+                  labelStyle: TextStyle(color: Colors.black),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Color(0xFF4C75FF)),
                   ),
                 ),
               ),

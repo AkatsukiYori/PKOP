@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:project_rpl/screen/main/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:project_rpl/model/pengguna_model.dart';
+import 'package:project_rpl/screen/auth/login.dart';
+import 'package:project_rpl/screen/auth/ubah_password.dart';
 
 class Pengguna {
   final int id;
@@ -28,7 +29,7 @@ class Pengguna {
       username: data['username'] ?? '',
       password: data['password'] ?? '',
       email: data['email'] ?? '',
-      no_hp: data['no_hp'] ?? '',
+      no_hp: data['nomor_hp'] ?? '',
     );
   }
 }
@@ -41,41 +42,39 @@ class ProfileWidget extends StatefulWidget {
 }
 
 class _ProfileWidgetState extends State<ProfileWidget> {
-  late Future<Pengguna> futurePengguna;
-
   Future<int?> getPenggunaIdFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt('id');
   }
 
-  Future<Pengguna> fetchPengguna(int id) async {
-    final response = await http.get(
-      Uri.parse(
-        'http://localhost/backend_project_rpl/select/pengguna.php?id=$id',
-      ),
-    );
+  Stream<Pengguna> fetchPengguna(Duration interval) async* {
+    while (true) {
+      final id = await getPenggunaIdFromPrefs();
+      final response = await http.get(
+        Uri.parse(
+          'http://localhost/backend_project_rpl/select/pengguna.php?id=$id',
+        ),
+      );
 
-    if (response.statusCode == 200) {
-      return Pengguna.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Data tidak ditemukan');
+      if (response.statusCode == 200) {
+        yield Pengguna.fromJson(json.decode(response.body));
+        await Future.delayed(interval);
+      } else {
+        throw Exception('Data tidak ditemukan');
+      }
     }
   }
 
   @override
   void initState() {
     super.initState();
-    futurePengguna = getPenggunaIdFromPrefs().then((id) {
-      if (id == null) throw Exception('ID tidak ditemukan');
-      return fetchPengguna(id);
-    });
   }
 
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFFFFFFF),
-      body: FutureBuilder<Pengguna>(
-        future: futurePengguna,
+      body: StreamBuilder<Pengguna>(
+        stream: fetchPengguna(Duration(seconds: 1)),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -96,6 +95,10 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       decoration: BoxDecoration(
                         color: Colors.grey[100],
                         borderRadius: BorderRadius.circular(100),
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/profile.jpeg'),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                     SizedBox(height: 10),
@@ -110,10 +113,14 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       '${pengguna.email}',
                       style: TextStyle(fontSize: 14, color: Color(0xFF9BA3AE)),
                     ),
+                    Text(
+                      '${pengguna.no_hp}',
+                      style: TextStyle(fontSize: 14, color: Color(0xFF9BA3AE)),
+                    ),
                     SizedBox(height: 20),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 1,
-                      height: MediaQuery.of(context).size.height * 0.268,
+                      height: MediaQuery.of(context).size.height * 0.34,
                       child: Container(
                         decoration: BoxDecoration(
                           color: Color(0x55DBEBFF),
@@ -192,7 +199,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     padding: EdgeInsets.symmetric(
-                                      horizontal: 2,
+                                      horizontal: 10,
                                       vertical: 5,
                                     ),
                                   ),
@@ -246,11 +253,72 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     padding: EdgeInsets.symmetric(
-                                      horizontal: 2,
+                                      horizontal: 10,
                                       vertical: 5,
                                     ),
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => UbahPasswordWidget(),
+                                      ),
+                                    );
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      SizedBox(
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.key,
+                                              color: Colors.black,
+                                            ),
+                                            SizedBox(width: 10),
+                                            Text(
+                                              'Ganti Password',
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.arrow_forward_ios_outlined,
+                                        color: Colors.black,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 50,
+                                child: TextButton(
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    foregroundColor: Colors.black,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 5,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => LoginWidget(),
+                                      ),
+                                    );
+                                  },
                                   child: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,

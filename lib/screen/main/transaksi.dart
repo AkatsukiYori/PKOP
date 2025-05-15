@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:date_field/date_field.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class Pengguna {
   final int id;
@@ -49,7 +50,7 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
   final TextEditingController _keteranganController = TextEditingController();
   final TextEditingController _nominalController = TextEditingController();
   String? _selectedKategori;
-  String? _selectedJenis;
+  String? _selectedJenis = 'pemasukan';
   DateTime? _selectedDate;
 
   bool _isLoading = false;
@@ -68,7 +69,7 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
     });
 
     final url = Uri.parse(
-      'http://localhost/backend_project_rpl/transaksi/transaksi.php',
+      'http://localhost/backend_project_rpl/crud/transaksi.php',
     );
 
     final response = await http.post(
@@ -156,26 +157,40 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Jenis Transaksi',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Jenis Transaksi',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        ' *',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 5),
                   DropdownButtonFormField(
-                    value: _selectedJenis,
+                    value:
+                        (_selectedJenis != '' ? _selectedJenis : 'pemasukan'),
                     onChanged: (value) {
                       setState(() {
                         _selectedJenis = value;
                       });
                     },
+
                     items: [
                       DropdownMenuItem(
                         child: Text('Pemasukan'),
-                        value: 'Pemasukan',
+                        value: 'pemasukan',
                       ),
                       DropdownMenuItem(
                         child: Text('Pengeluaran'),
-                        value: 'Pengeluaran',
+                        value: 'pengeluaran',
                       ),
                     ],
                     decoration: InputDecoration(
@@ -196,12 +211,27 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Tanggal',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Tanggal',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        ' *',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 5),
                   DateTimeFormField(
+                    canClear: true,
+                    dateFormat: DateFormat('dd MMM yyyy'),
+                    mode: DateTimeFieldPickerMode.date,
                     decoration: InputDecoration(
                       hintText: 'Pilih tanggal',
                       focusedBorder: OutlineInputBorder(
@@ -213,11 +243,9 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
                         borderSide: BorderSide(color: Color(0xFF4C75FF)),
                       ),
                     ),
-                    firstDate: DateTime.now().add(const Duration(days: 10)),
-                    lastDate: DateTime.now().add(const Duration(days: 40)),
-                    initialPickerDateTime: DateTime.now().add(
-                      const Duration(days: 20),
-                    ),
+                    firstDate: DateTime.now().subtract(Duration(days: 10950)),
+                    lastDate: DateTime.now().add(Duration(days: 0)),
+                    initialPickerDateTime: DateTime.now(),
                     onChanged: (value) {
                       setState(() {
                         _selectedDate = value;
@@ -230,15 +258,26 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Nama Transaksi',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Row(
+                    children: [
+                      Text(
+                        'Nama Transaksi',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        ' *',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 5),
                   TextField(
                     controller: _judulTransaksiController,
                     decoration: InputDecoration(
-                      hintText: 'Masukan Nama Transaksi',
+                      hintText: 'Masukan nama transaksi',
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(color: Colors.black),
@@ -255,9 +294,21 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Kategori',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Kategori',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        ' *',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 5),
                   DropdownButtonFormField(
@@ -268,14 +319,46 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
                       });
                     },
                     items: [
-                      DropdownMenuItem(
-                        child: Text('Makanan & Minuman'),
-                        value: 'makanan_minuman',
-                      ),
-                      DropdownMenuItem(
-                        child: Text('Travelling'),
-                        value: 'travel',
-                      ),
+                      if (_selectedJenis == 'pemasukan') ...[
+                        DropdownMenuItem(child: Text('Gaji'), value: 'gaji'),
+                        DropdownMenuItem(
+                          child: Text('Dividen'),
+                          value: 'dividen',
+                        ),
+                        DropdownMenuItem(
+                          child: Text('Pemasukan Lainnya'),
+                          value: 'pemasukan_lainnya',
+                        ),
+                      ] else ...[
+                        DropdownMenuItem(
+                          child: Text('Transportasi'),
+                          value: 'transportasi',
+                        ),
+                        DropdownMenuItem(
+                          child: Text('Konsumsi'),
+                          value: 'konsumsi',
+                        ),
+                        DropdownMenuItem(
+                          child: Text('Akomodasi'),
+                          value: 'akomodasi',
+                        ),
+                        DropdownMenuItem(
+                          child: Text('Edukasi'),
+                          value: 'edukasi',
+                        ),
+                        DropdownMenuItem(
+                          child: Text('Hiburan'),
+                          value: 'hiburan',
+                        ),
+                        DropdownMenuItem(
+                          child: Text('Kesehatan'),
+                          value: 'kesehatan',
+                        ),
+                        DropdownMenuItem(
+                          child: Text('Investasi'),
+                          value: 'investasi',
+                        ),
+                      ],
                     ],
                     decoration: InputDecoration(
                       hintText: 'Pilih kategori',
@@ -295,15 +378,27 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Nominal',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Nominal',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        ' *',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 5),
                   TextField(
                     controller: _nominalController,
                     decoration: InputDecoration(
-                      hintText: 'Masukan Nominal',
+                      hintText: 'Masukan nominal',
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(color: Colors.black),
@@ -328,7 +423,7 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
                   TextField(
                     controller: _keteranganController,
                     decoration: InputDecoration(
-                      hintText: 'Masukan Keterangan',
+                      hintText: 'Masukan keterangan',
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(color: Colors.black),
