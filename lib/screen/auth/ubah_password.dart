@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -47,20 +48,12 @@ class _UbahPasswordWidgetState extends State<UbahPasswordWidget> {
   final TextEditingController _confirmationPasswordController =
       TextEditingController();
 
-  bool _isLoading = false;
-  String _message = '';
-
   Future<void> _editProfile() async {
     final id = await getPenggunaIdFromPrefs();
 
     if (id == null) {
       throw Exception('ID tidak ditemukan');
     }
-
-    setState(() {
-      _isLoading = true;
-      _message = '';
-    });
 
     final url = Uri.parse(
       'http://localhost/backend_project_rpl/crud/ubah_password.php',
@@ -79,37 +72,160 @@ class _UbahPasswordWidgetState extends State<UbahPasswordWidget> {
     if (response.body.isNotEmpty) {
       try {
         final data = jsonDecode(response.body);
-        setState(() {
-          _isLoading = false;
-          _message = 'Data berhasil diubah';
-        });
-
         if (data['status'] == true) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Update password berhasil')));
+          showDialog(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: Text(
+                    textAlign: TextAlign.center,
+                    'Berhasil',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
+                  content: Text(
+                    'Password berhasil diubah',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  backgroundColor: Color(0xFFF9FCFF),
+                  icon: Icon(
+                    Icons.check_circle_outline,
+                    color: Colors.green,
+                    size: 55,
+                  ),
+                  actions: [
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF4C75FF),
+                          foregroundColor: Colors.white,
+                          fixedSize: Size(
+                            MediaQuery.of(context).size.width * 0.3,
+                            40,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('OK'),
+                      ),
+                    ),
+                  ],
+                ),
+          );
+
+          _oldPasswordController.clear();
+          _newPasswordController.clear();
+          _confirmationPasswordController.clear();
         } else {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error: ${data['message']}')));
+          showDialog(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: Text(
+                    'Gagal',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
+                  content: Text(
+                    data['message'],
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  backgroundColor: Color(0xFFF9FCFF),
+                  icon: Icon(Icons.error_outline, color: Colors.red, size: 55),
+                  actions: [
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF4C75FF),
+                          foregroundColor: Colors.white,
+                          fixedSize: Size(
+                            MediaQuery.of(context).size.width * 0.3,
+                            40,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('OK'),
+                      ),
+                    ),
+                  ],
+                ),
+          );
         }
       } catch (e) {
-        setState(() {
-          _isLoading = false;
-          _message = "Error parsing response: ${e.toString()}";
-        });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        showDialog(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: Text(
+                  'Gagal',
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                ),
+                content: Text(
+                  textAlign: TextAlign.center,
+                  'Error: ${e.toString()}',
+                  style: TextStyle(fontSize: 14),
+                ),
+                backgroundColor: Color(0xFFF9FCFF),
+                icon: Icon(Icons.error_outline, color: Colors.red, size: 55),
+                actions: [
+                  Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF4C75FF),
+                        foregroundColor: Colors.white,
+                        fixedSize: Size(
+                          MediaQuery.of(context).size.width * 0.3,
+                          40,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text('OK'),
+                    ),
+                  ),
+                ],
+              ),
+        );
       }
     } else {
-      setState(() {
-        _isLoading = false;
-        _message = "Empty response from server.";
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Empty response from server.')));
+      showDialog(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: Text(
+                'Gagal',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              ),
+              content: Text(
+                textAlign: TextAlign.center,
+                'Empty response from server.',
+                style: TextStyle(fontSize: 14),
+              ),
+              backgroundColor: Color(0xFFF9FCFF),
+              icon: Icon(Icons.error_outline, color: Colors.red, size: 55),
+              actions: [
+                Center(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF4C75FF),
+                      foregroundColor: Colors.white,
+                      fixedSize: Size(
+                        MediaQuery.of(context).size.width * 0.3,
+                        40,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('OK'),
+                  ),
+                ),
+              ],
+            ),
+      );
     }
   }
 
@@ -163,6 +279,7 @@ class _UbahPasswordWidgetState extends State<UbahPasswordWidget> {
                     ),
                     SizedBox(height: 5),
                     TextField(
+                      obscureText: true,
                       controller: _oldPasswordController,
                       decoration: InputDecoration(
                         hintText: 'Masukan password lama',
@@ -200,6 +317,7 @@ class _UbahPasswordWidgetState extends State<UbahPasswordWidget> {
                     ),
                     SizedBox(height: 5),
                     TextField(
+                      obscureText: true,
                       controller: _newPasswordController,
                       decoration: InputDecoration(
                         hintText: 'Masukan password baru',
@@ -237,6 +355,7 @@ class _UbahPasswordWidgetState extends State<UbahPasswordWidget> {
                     ),
                     SizedBox(height: 5),
                     TextField(
+                      obscureText: true,
                       controller: _confirmationPasswordController,
                       decoration: InputDecoration(
                         hintText: 'Konfirmasi password',

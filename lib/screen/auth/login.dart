@@ -18,24 +18,47 @@ class _LoginWidgetState extends State<LoginWidget> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  bool _isLoading = false;
-  String _message = '';
-
   Future<void> _login() async {
     final String username = _usernameController.text;
     final String password = _passwordController.text;
 
     if (username.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Username atau password tidak boleh kosong!')),
+      showDialog(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: Text(
+                'Gagal',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              ),
+              content: Text(
+                'Username atau password tidak boleh kosong',
+                style: TextStyle(fontSize: 14),
+              ),
+              backgroundColor: Color(0xFFF9FCFF),
+              icon: Icon(Icons.error_outline, color: Colors.red, size: 55),
+              actions: [
+                Center(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF4C75FF),
+                      foregroundColor: Colors.white,
+                      fixedSize: Size(
+                        MediaQuery.of(context).size.width * 0.3,
+                        40,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('OK'),
+                  ),
+                ),
+              ],
+            ),
       );
       return;
     }
-
-    setState(() {
-      _isLoading = true;
-      _message = '';
-    });
 
     final url = Uri.parse(
       'http://localhost/backend_project_rpl/auth/login.php',
@@ -54,18 +77,10 @@ class _LoginWidgetState extends State<LoginWidget> {
     if (response.body.isNotEmpty) {
       try {
         final data = jsonDecode(response.body);
-        setState(() {
-          _isLoading = false;
-          _message = data["message"];
-        });
-
         if (data["status"] == true) {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setInt('id', data['data']);
 
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("✅ Login Successful")));
           // Navigate to the next page after successful login
           Navigator.pushReplacement(
             context,
@@ -74,28 +89,113 @@ class _LoginWidgetState extends State<LoginWidget> {
             ), // Replace HomePage() with your target page
           );
         } else {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("❌ ${data['message']}")));
+          showDialog(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: Text(
+                    'Gagal',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
+                  content: Text(
+                    textAlign: TextAlign.center,
+                    data["message"],
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  backgroundColor: Color(0xFFF9FCFF),
+                  icon: Icon(Icons.error_outline, color: Colors.red, size: 55),
+                  actions: [
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF4C75FF),
+                          foregroundColor: Colors.white,
+                          fixedSize: Size(
+                            MediaQuery.of(context).size.width * 0.3,
+                            40,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('OK'),
+                      ),
+                    ),
+                  ],
+                ),
+          );
         }
       } catch (e) {
-        // If JSON parsing fails, show error
-        setState(() {
-          _isLoading = false;
-          _message = "Error parsing response: ${e.toString()}";
-        });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("❌ Error: ${e.toString()}")));
+        showDialog(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: Text(
+                  'Gagal',
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                ),
+                content: Text(
+                  'Error: ${e.toString()}',
+                  style: TextStyle(fontSize: 14),
+                ),
+                backgroundColor: Color(0xFFF9FCFF),
+                icon: Icon(Icons.error_outline, color: Colors.red, size: 55),
+                actions: [
+                  Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF4C75FF),
+                        foregroundColor: Colors.white,
+                        fixedSize: Size(
+                          MediaQuery.of(context).size.width * 0.3,
+                          40,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text('OK'),
+                    ),
+                  ),
+                ],
+              ),
+        );
       }
     } else {
-      setState(() {
-        _isLoading = false;
-        _message = "Empty response from server.";
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("❌ Empty response from server.")));
+      showDialog(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: Text(
+                'Gagal',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              ),
+              content: Text(
+                'Empty response from server.',
+                style: TextStyle(fontSize: 14),
+              ),
+              backgroundColor: Color(0xFFF9FCFF),
+              icon: Icon(Icons.error_outline, color: Colors.red, size: 55),
+              actions: [
+                Center(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF4C75FF),
+                      foregroundColor: Colors.white,
+                      fixedSize: Size(
+                        MediaQuery.of(context).size.width * 0.3,
+                        40,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('OK'),
+                  ),
+                ),
+              ],
+            ),
+      );
     }
   }
 
@@ -148,8 +248,9 @@ class _LoginWidgetState extends State<LoginWidget> {
                   ),
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 12),
               TextField(
+                obscureText: true,
                 controller: _passwordController,
                 autocorrect: false,
                 autofillHints: Iterable.empty(),
@@ -167,31 +268,23 @@ class _LoginWidgetState extends State<LoginWidget> {
                   ),
                 ),
               ),
-              SizedBox(height: 10),
-              _isLoading
-                  ? CircularProgressIndicator()
-                  : TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Color(0xFF4C75FF),
-                      foregroundColor: Colors.white,
-                      fixedSize: Size(
-                        MediaQuery.of(context).size.width * 1,
-                        40,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: _login,
-                    child: Text(
-                      'Log In',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+              SizedBox(height: 12),
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Color(0xFF4C75FF),
+                  foregroundColor: Colors.white,
+                  fixedSize: Size(MediaQuery.of(context).size.width * 1, 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-              SizedBox(height: 10),
+                ),
+                onPressed: _login,
+                child: Text(
+                  'Log In',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

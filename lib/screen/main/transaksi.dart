@@ -53,20 +53,12 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
   String? _selectedJenis = 'pemasukan';
   DateTime? _selectedDate;
 
-  bool _isLoading = false;
-  String _message = '';
-
   Future<void> _addingTransaction() async {
     final id = await getPenggunaIdFromPrefs();
 
     if (id == null) {
       throw Exception('ID tidak ditemukan');
     }
-
-    setState(() {
-      _isLoading = true;
-      _message = '';
-    });
 
     final url = Uri.parse(
       'http://localhost/backend_project_rpl/crud/transaksi.php',
@@ -90,37 +82,163 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
     if (response.body.isNotEmpty) {
       try {
         final data = jsonDecode(response.body);
-        setState(() {
-          _isLoading = false;
-          _message = data['message'];
-        });
-
         if (data['status'] == true) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Tambah transaksi berhasil')));
+          showDialog(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: Text(
+                    'Berhasil',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
+                  content: Text(
+                    textAlign: TextAlign.center,
+                    'Transaksi berhasil ditambahkan',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  backgroundColor: Color(0xFFF9FCFF),
+                  icon: Icon(
+                    Icons.check_circle_outline,
+                    color: Colors.green,
+                    size: 55,
+                  ),
+                  actions: [
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF4C75FF),
+                          foregroundColor: Colors.white,
+                          fixedSize: Size(
+                            MediaQuery.of(context).size.width * 0.3,
+                            40,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('OK'),
+                      ),
+                    ),
+                  ],
+                ),
+          );
+
+          _judulTransaksiController.clear();
+          _keteranganController.clear();
+          _nominalController.clear();
+          _selectedKategori = null;
+          _selectedJenis = 'pemasukan';
+          _selectedDate = null;
         } else {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error: ${data['message']}')));
+          showDialog(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: Text(
+                    'Gagal',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
+                  content: Text(
+                    textAlign: TextAlign.center,
+                    data['message'],
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  backgroundColor: Color(0xFFF9FCFF),
+                  icon: Icon(Icons.error_outline, color: Colors.red, size: 55),
+                  actions: [
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF4C75FF),
+                          foregroundColor: Colors.white,
+                          fixedSize: Size(
+                            MediaQuery.of(context).size.width * 0.3,
+                            40,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('OK'),
+                      ),
+                    ),
+                  ],
+                ),
+          );
         }
       } catch (e) {
-        setState(() {
-          _isLoading = false;
-          _message = 'Error parsing response: ${e.toString()}';
-        });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        showDialog(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: Text(
+                  'Gagal',
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                ),
+                content: Text(
+                  textAlign: TextAlign.center,
+                  'Error: ${e.toString()}',
+                  style: TextStyle(fontSize: 14),
+                ),
+                backgroundColor: Color(0xFFF9FCFF),
+                icon: Icon(Icons.error_outline, color: Colors.red, size: 55),
+                actions: [
+                  Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF4C75FF),
+                        foregroundColor: Colors.white,
+                        fixedSize: Size(
+                          MediaQuery.of(context).size.width * 0.3,
+                          40,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text('OK'),
+                    ),
+                  ),
+                ],
+              ),
+        );
       }
     } else {
-      setState(() {
-        _isLoading = false;
-        _message = "Empty response from server.";
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Empty response from server.")));
-      });
+      showDialog(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: Text(
+                'Gagal',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              ),
+              content: Text(
+                textAlign: TextAlign.center,
+                'Empty response from server.',
+                style: TextStyle(fontSize: 14),
+              ),
+              backgroundColor: Color(0xFFF9FCFF),
+              icon: Icon(Icons.error_outline, color: Colors.red, size: 55),
+              actions: [
+                Center(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF4C75FF),
+                      foregroundColor: Colors.white,
+                      fixedSize: Size(
+                        MediaQuery.of(context).size.width * 0.3,
+                        40,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('OK'),
+                  ),
+                ),
+              ],
+            ),
+      );
     }
   }
 
@@ -439,7 +557,7 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
               SizedBox(height: 16),
               TextButton(
                 style: TextButton.styleFrom(
-                  fixedSize: Size(180, 45),
+                  fixedSize: Size(180, 55),
                   backgroundColor: Color(0xFF4C75FF),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),

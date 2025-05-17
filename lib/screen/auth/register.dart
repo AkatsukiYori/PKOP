@@ -16,15 +16,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  bool _isLoading = false;
-  String _message = '';
-
   Future<void> _register() async {
-    setState(() {
-      _isLoading = true;
-      _message = '';
-    });
-
     final url = Uri.parse(
       'http://localhost/backend_project_rpl/auth/register.php',
     );
@@ -43,15 +35,46 @@ class _RegisterWidgetState extends State<RegisterWidget> {
     if (response.body.isNotEmpty) {
       try {
         final data = jsonDecode(response.body);
-        setState(() {
-          _isLoading = false;
-          _message = data["message"];
-        });
-
         if (data["status"] == true) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("✅ Sign up Berhasil")));
+          showDialog(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: Text(
+                    'Berhasil',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
+                  content: Text(
+                    textAlign: TextAlign.center,
+                    'Sign up berhasil',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  backgroundColor: Color(0xFFF9FCFF),
+                  icon: Icon(
+                    Icons.check_circle_outline,
+                    color: Colors.green,
+                    size: 55,
+                  ),
+                  actions: [
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF4C75FF),
+                          foregroundColor: Colors.white,
+                          fixedSize: Size(
+                            MediaQuery.of(context).size.width * 0.3,
+                            40,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('OK'),
+                      ),
+                    ),
+                  ],
+                ),
+          );
           // Navigate to the next page after successful login
           Navigator.pushReplacement(
             context,
@@ -60,28 +83,115 @@ class _RegisterWidgetState extends State<RegisterWidget> {
             ), // Replace HomePage() with your target page
           );
         } else {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("❌ ${data['message']}")));
+          showDialog(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: Text(
+                    'Gagal',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
+                  content: Text(
+                    textAlign: TextAlign.center,
+                    data['message'],
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  backgroundColor: Color(0xFFF9FCFF),
+                  icon: Icon(Icons.error_outline, color: Colors.red, size: 55),
+                  actions: [
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF4C75FF),
+                          foregroundColor: Colors.white,
+                          fixedSize: Size(
+                            MediaQuery.of(context).size.width * 0.3,
+                            40,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('OK'),
+                      ),
+                    ),
+                  ],
+                ),
+          );
         }
       } catch (e) {
-        // If JSON parsing fails, show error
-        setState(() {
-          _isLoading = false;
-          _message = "Error parsing response: ${e.toString()}";
-        });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("❌ Error: ${e.toString()}")));
+        showDialog(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: Text(
+                  'Gagal',
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                ),
+                content: Text(
+                  textAlign: TextAlign.center,
+                  'Error: ${e.toString()}',
+                  style: TextStyle(fontSize: 14),
+                ),
+                backgroundColor: Color(0xFFF9FCFF),
+                icon: Icon(Icons.error_outline, color: Colors.red, size: 55),
+                actions: [
+                  Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF4C75FF),
+                        foregroundColor: Colors.white,
+                        fixedSize: Size(
+                          MediaQuery.of(context).size.width * 0.3,
+                          40,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text('OK'),
+                    ),
+                  ),
+                ],
+              ),
+        );
       }
     } else {
-      setState(() {
-        _isLoading = false;
-        _message = "Empty response from server.";
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("❌ Empty response from server.")));
+      showDialog(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: Text(
+                'Gagal',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              ),
+              content: Text(
+                textAlign: TextAlign.center,
+                'Empty response from server.',
+                style: TextStyle(fontSize: 14),
+              ),
+              backgroundColor: Color(0xFFF9FCFF),
+              icon: Icon(Icons.error_outline, color: Colors.red, size: 55),
+              actions: [
+                Center(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF4C75FF),
+                      foregroundColor: Colors.white,
+                      fixedSize: Size(
+                        MediaQuery.of(context).size.width * 0.3,
+                        40,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('OK'),
+                  ),
+                ),
+              ],
+            ),
+      );
     }
   }
 
@@ -132,7 +242,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                   ),
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 12),
               TextField(
                 controller: _usernameController,
                 decoration: InputDecoration(
@@ -149,8 +259,9 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                   ),
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 12),
               TextField(
+                obscureText: true,
                 controller: _passwordController,
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.key, color: Colors.grey[600]),
@@ -166,7 +277,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                   ),
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 12),
               TextButton(
                 style: TextButton.styleFrom(
                   backgroundColor: Color(0xFF4C75FF),
@@ -182,7 +293,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

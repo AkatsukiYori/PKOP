@@ -176,215 +176,240 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                 ),
               ],
             ),
-            body: Padding(
-              padding: EdgeInsets.symmetric(vertical: 10),
-              child: Container(
-                color: Color(0xFFFFFFFF),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            body:
+                transaksiList.isEmpty
+                    ? Center(
+                      child: Text(
+                        'Tidak ada transaksi',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    )
+                    : Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: Container(
+                        color: Color(0xFFFFFFFF),
+                        child: SingleChildScrollView(
+                          child: Column(
                             children: [
-                              Text(
-                                'Laporan Transaksi',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                'Mei 2025',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xDD9BA3AE),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Laporan Transaksi',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Mei 2025',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xDD9BA3AE),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 20),
-                        child: Card(
-                          elevation: 2,
-                          color: Color(0xFFFFFFFF),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 15,
-                              horizontal: 10,
-                            ),
-                            child: SizedBox(
-                              height: 300,
-                              child: BarChart(
-                                BarChartData(
-                                  alignment: BarChartAlignment.spaceAround,
-                                  gridData: FlGridData(show: false),
-                                  maxY: 30,
-                                  barTouchData: BarTouchData(
-                                    enabled: true,
-                                    touchTooltipData: BarTouchTooltipData(
-                                      tooltipBgColor: Colors.grey[100],
+                              Padding(
+                                padding: EdgeInsets.only(left: 20),
+                                child: Card(
+                                  elevation: 2,
+                                  color: Color(0xFFFFFFFF),
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 15,
+                                      horizontal: 10,
                                     ),
-                                  ),
-                                  titlesData: FlTitlesData(
-                                    bottomTitles: AxisTitles(
-                                      sideTitles: SideTitles(
-                                        showTitles: true,
-                                        getTitlesWidget: bottomTitles,
+                                    child: SizedBox(
+                                      height: 300,
+                                      child: BarChart(
+                                        BarChartData(
+                                          alignment:
+                                              BarChartAlignment.spaceAround,
+                                          gridData: FlGridData(show: false),
+                                          maxY: 30,
+                                          barTouchData: BarTouchData(
+                                            enabled: true,
+                                            touchTooltipData:
+                                                BarTouchTooltipData(
+                                                  tooltipBgColor:
+                                                      Colors.grey[100],
+                                                ),
+                                          ),
+                                          titlesData: FlTitlesData(
+                                            bottomTitles: AxisTitles(
+                                              sideTitles: SideTitles(
+                                                showTitles: true,
+                                                getTitlesWidget: bottomTitles,
+                                              ),
+                                            ),
+                                            leftTitles: AxisTitles(
+                                              sideTitles: SideTitles(
+                                                showTitles: true,
+                                                reservedSize: 30,
+                                                interval: 5,
+                                              ),
+                                            ),
+                                            rightTitles: AxisTitles(
+                                              sideTitles: SideTitles(
+                                                showTitles: false,
+                                              ),
+                                            ),
+                                            topTitles: AxisTitles(
+                                              sideTitles: SideTitles(
+                                                showTitles: false,
+                                              ),
+                                            ),
+                                          ),
+                                          borderData: FlBorderData(show: false),
+                                          barGroups: [
+                                            makeGroupData(0, 8, 13),
+                                            makeGroupData(1, 12, 15),
+                                            makeGroupData(2, 16, 5),
+                                            makeGroupData(3, 21, 10),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                    leftTitles: AxisTitles(
-                                      sideTitles: SideTitles(
-                                        showTitles: true,
-                                        reservedSize: 30,
-                                        interval: 5,
-                                      ),
-                                    ),
-                                    rightTitles: AxisTitles(
-                                      sideTitles: SideTitles(showTitles: false),
-                                    ),
-                                    topTitles: AxisTitles(
-                                      sideTitles: SideTitles(showTitles: false),
-                                    ),
                                   ),
-                                  borderData: FlBorderData(show: false),
-                                  barGroups: [
-                                    makeGroupData(0, 8, 13),
-                                    makeGroupData(1, 12, 15),
-                                    makeGroupData(2, 16, 5),
-                                    makeGroupData(3, 21, 10),
-                                  ],
                                 ),
                               ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 20, top: 16, bottom: 5),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Riwayat Transaksi',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                      transaksiList.isEmpty
-                          ? Text(
-                            'Tidak ada transaksi',
-                            style: TextStyle(fontSize: 18),
-                          )
-                          : Column(
-                            children: [
-                              ...transaksiList.take(6).map((trx) {
-                                final formattedTanggal = DateFormat(
-                                  'dd MMM yyyy HH:mm',
-                                ).format(DateTime.parse(trx.tanggal ?? ''));
-                                final formattedNominal = NumberFormat.currency(
-                                  locale: 'id_ID',
-                                  symbol: 'Rp',
-                                  decimalDigits: 0,
-                                ).format(trx.nominal);
-                                final iconChange =
-                                    (trx.jenis_transaksi == 'pemasukan'
-                                        ? Icons.add
-                                        : Icons.horizontal_rule);
-                                final textColor =
-                                    (trx.jenis_transaksi == 'pemasukan'
-                                        ? Colors.green
-                                        : Colors.redAccent);
 
-                                return Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 2,
-                                  ),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Color(0x55DBEBFF),
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: Color(0x664C75FF),
-                                        width: 1,
-                                      ),
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  left: 20,
+                                  top: 16,
+                                  bottom: 5,
+                                ),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'Riwayat Transaksi',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    child: ListTile(
-                                      leading: Container(
-                                        width: 40,
-                                        height: 40,
+                                  ),
+                                ),
+                              ),
+                              Column(
+                                children: [
+                                  ...transaksiList.take(6).map((trx) {
+                                    final formattedTanggal = DateFormat(
+                                      'dd MMM yyyy HH:mm',
+                                    ).format(DateTime.parse(trx.tanggal ?? ''));
+                                    final formattedNominal =
+                                        NumberFormat.currency(
+                                          locale: 'id_ID',
+                                          symbol: 'Rp',
+                                          decimalDigits: 0,
+                                        ).format(trx.nominal);
+                                    final iconChange =
+                                        (trx.jenis_transaksi == 'pemasukan'
+                                            ? Icons.add
+                                            : Icons.horizontal_rule);
+                                    final textColor =
+                                        (trx.jenis_transaksi == 'pemasukan'
+                                            ? Colors.green
+                                            : Colors.redAccent);
+
+                                    return Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 2,
+                                      ),
+                                      child: Container(
                                         decoration: BoxDecoration(
-                                          color: Color(0xFF4C75FF),
+                                          color: Color(0x55DBEBFF),
                                           borderRadius: BorderRadius.circular(
-                                            50,
+                                            10,
+                                          ),
+                                          border: Border.all(
+                                            color: Color(0x664C75FF),
+                                            width: 1,
                                           ),
                                         ),
-                                        child: Icon(
-                                          iconChange,
-                                          color: Color(0xFFFFFFFF),
+                                        child: ListTile(
+                                          leading: Container(
+                                            width: 40,
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFF4C75FF),
+                                              borderRadius:
+                                                  BorderRadius.circular(50),
+                                            ),
+                                            child: Icon(
+                                              iconChange,
+                                              color: Color(0xFFFFFFFF),
+                                            ),
+                                          ),
+                                          title: Text(
+                                            trx.judul_transaksi ?? '',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          subtitle: Text(
+                                            '${trx.keterangan ?? ''} ${formattedTanggal} WIB',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          trailing: Text(
+                                            formattedNominal,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15,
+                                              color: textColor,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                      title: Text(
-                                        trx.judul_transaksi ?? '',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      subtitle: Text(
-                                        '${trx.keterangan ?? ''} ${formattedTanggal} WIB',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      trailing: Text(
-                                        formattedNominal,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
-                                          color: textColor,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                              Padding(
-                                padding: EdgeInsets.symmetric(vertical: 10),
-                                child: TextButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => HistoryWidget(),
                                       ),
                                     );
-                                  },
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: Color(0xFF4C75FF),
-                                    fixedSize: Size(180, 40),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5),
+                                  }).toList(),
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 10),
+                                    child: TextButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder:
+                                                (context) => HistoryWidget(),
+                                          ),
+                                        );
+                                      },
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Color(0xFF4C75FF),
+                                        fixedSize: Size(180, 40),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            5,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'Lihat Semua',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Color(0xFFF9FCFF),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  child: Text(
-                                    'Lihat Semua',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Color(0xFFF9FCFF),
-                                    ),
-                                  ),
-                                ),
+                                ],
                               ),
                             ],
                           ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+                        ),
+                      ),
+                    ),
           );
         }
       },
