@@ -6,30 +6,37 @@ import 'package:project_rpl/screen/main/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:project_rpl/screen/auth/login.dart';
 import 'package:project_rpl/screen/auth/ubah_password.dart';
+import 'package:intl/intl.dart';
 
 class Pengguna {
   final int id;
   final String username;
   final String password;
   final String email;
-  final String no_hp;
+  final String nomor_hp;
+  final double pemasukan;
+  final double pengeluaran;
 
   Pengguna({
     required this.id,
     required this.username,
     required this.password,
     required this.email,
-    required this.no_hp,
+    required this.nomor_hp,
+    required this.pemasukan,
+    required this.pengeluaran,
   });
 
   factory Pengguna.fromJson(Map<String, dynamic> json) {
     final data = json['data'];
     return Pengguna(
-      id: data['id'] ?? '',
+      id: data['id'] ?? 0,
       username: data['username'] ?? '',
       password: data['password'] ?? '',
       email: data['email'] ?? '',
-      no_hp: data['nomor_hp'] ?? '',
+      nomor_hp: data['nomor_hp'] ?? '',
+      pemasukan: data['total_pemasukan'] ?? 0,
+      pengeluaran: data['total_pengeluaran'] ?? 0,
     );
   }
 }
@@ -82,6 +89,16 @@ class _ProfileWidgetState extends State<ProfileWidget> {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             final pengguna = snapshot.data!;
+            final formattedPemasukan = NumberFormat.currency(
+              locale: 'id_ID',
+              decimalDigits: 0,
+              symbol: 'Rp',
+            ).format(pengguna.pemasukan);
+            final formattedPengeluaran = NumberFormat.currency(
+              locale: 'id_ID',
+              decimalDigits: 0,
+              symbol: 'Rp',
+            ).format(pengguna.pengeluaran);
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 55, vertical: 30),
               child: Container(
@@ -114,7 +131,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       style: TextStyle(fontSize: 14, color: Color(0xFF9BA3AE)),
                     ),
                     Text(
-                      '${pengguna.no_hp}',
+                      '${pengguna.nomor_hp}',
                       style: TextStyle(fontSize: 14, color: Color(0xFF9BA3AE)),
                     ),
                     SizedBox(height: 20),
@@ -155,7 +172,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                         ),
                                       ),
                                       Text(
-                                        'Rp 217.000.000',
+                                        formattedPemasukan,
                                         style: TextStyle(fontSize: 15),
                                       ),
                                     ],
@@ -181,7 +198,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                         ),
                                       ),
                                       Text(
-                                        'Rp 100.000.000',
+                                        formattedPengeluaran,
                                         style: TextStyle(fontSize: 15),
                                       ),
                                     ],
@@ -355,56 +372,6 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                         ),
                       ),
                     ),
-                    // SizedBox(
-                    //   height: MediaQuery.of(context).size.height * 0.4,
-                    //   child: Column(
-                    //     mainAxisAlignment: MainAxisAlignment.end,
-                    //     children: [
-                    //       TextButton(
-                    //         onPressed: () {
-                    //           Navigator.push(
-                    //             context,
-                    //             MaterialPageRoute(
-                    //               builder: (context) => PengaturanWidget(),
-                    //             ),
-                    //           );
-                    //         },
-                    //         style: TextButton.styleFrom(
-                    //           backgroundColor: Color(0xFF4C75FF),
-                    //           fixedSize: Size(180, 40),
-                    //           shape: RoundedRectangleBorder(
-                    //             borderRadius: BorderRadius.circular(5),
-                    //           ),
-                    //         ),
-                    //         child: Text(
-                    //           'Pengaturan',
-                    //           style: TextStyle(
-                    //             color: Color(0xFFF9FCFF),
-                    //             fontSize: 16,
-                    //           ),
-                    //         ),
-                    //       ),
-                    //       SizedBox(height: 10),
-                    //       TextButton(
-                    //         onPressed: () {},
-                    //         style: TextButton.styleFrom(
-                    //           backgroundColor: Color(0xFF4C75FF),
-                    //           fixedSize: Size(180, 40),
-                    //           shape: RoundedRectangleBorder(
-                    //             borderRadius: BorderRadius.circular(5),
-                    //           ),
-                    //         ),
-                    //         child: Text(
-                    //           'Logout',
-                    //           style: TextStyle(
-                    //             fontSize: 16,
-                    //             color: Color(0xFFF9FCFF),
-                    //           ),
-                    //         ),
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
                   ],
                 ),
               ),

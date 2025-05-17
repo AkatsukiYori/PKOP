@@ -8,12 +8,22 @@ import 'package:intl/intl.dart';
 
 class Pengguna {
   final int id;
+  final double pemasukan;
+  final double pengeluaran;
 
-  Pengguna({required this.id});
+  Pengguna({
+    required this.id,
+    required this.pemasukan,
+    required this.pengeluaran,
+  });
 
   factory Pengguna.fromJson(Map<String, dynamic> json) {
     final data = json['data'];
-    return Pengguna(id: data['id'] ?? '');
+    return Pengguna(
+      id: data['id'] ?? 0,
+      pemasukan: data['total_pemasukan'] ?? 0,
+      pengeluaran: data['total_pengeluaran'] ?? 0,
+    );
   }
 }
 
@@ -26,6 +36,9 @@ class TransaksiWidget extends StatefulWidget {
 
 class _TransaksiWidgetState extends State<TransaksiWidget> {
   late Future<Pengguna> futurePengguna;
+  double pemasukan_sekarang = 0;
+  double pengeluaran_sekarang = 0;
+
   Future<int?> getPenggunaIdFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt('id');
@@ -39,6 +52,12 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
     );
 
     if (response.statusCode == 200) {
+      setState(() {
+        pemasukan_sekarang =
+            Pengguna.fromJson(json.decode(response.body)).pemasukan;
+        pengeluaran_sekarang =
+            Pengguna.fromJson(json.decode(response.body)).pengeluaran;
+      });
       return Pengguna.fromJson(json.decode(response.body));
     } else {
       throw Exception('Data tidak ditemukan');
@@ -74,11 +93,13 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
         "jenis_transaksi": _selectedJenis,
         "keterangan": _keteranganController.text,
         "nominal": _nominalController.text,
+        "pemasukan": pemasukan_sekarang + double.parse(_nominalController.text),
+        "pengeluaran":
+            pengeluaran_sekarang + double.parse(_nominalController.text),
       }),
     );
 
     if (!mounted) return;
-
     if (response.body.isNotEmpty) {
       try {
         final data = jsonDecode(response.body);
