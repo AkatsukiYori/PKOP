@@ -369,8 +369,8 @@ class _TransaksiWidgetState extends State<TransaksiWidget> {
                   SizedBox(height: 5),
                   DateTimeFormField(
                     canClear: true,
-                    dateFormat: DateFormat('dd MMM yyyy'),
-                    mode: DateTimeFieldPickerMode.date,
+                    dateFormat: DateFormat('dd MMM yyyy HH:mm'),
+                    mode: DateTimeFieldPickerMode.dateAndTime,
                     decoration: InputDecoration(
                       hintText: 'Pilih tanggal',
                       focusedBorder: OutlineInputBorder(

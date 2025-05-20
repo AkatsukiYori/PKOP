@@ -4,7 +4,13 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
-import 'package:date_field/date_field.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
+import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'dart:html' as html;
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 
 class Pengguna {
   final String username;
@@ -23,6 +29,7 @@ class Transaksi {
   final int? nominal;
   final String? tanggal;
   final String? jenis_transaksi;
+  final String? kategori;
 
   Transaksi({
     this.judul_transaksi,
@@ -30,6 +37,7 @@ class Transaksi {
     this.nominal,
     this.tanggal,
     this.jenis_transaksi,
+    this.kategori,
   });
 
   factory Transaksi.fromJson(Map<String, dynamic> json) {
@@ -39,6 +47,7 @@ class Transaksi {
       nominal: json['nominal'],
       tanggal: json['tanggal'],
       jenis_transaksi: json['jenis_transaksi'],
+      kategori: json['kategori'],
     );
   }
 }
@@ -53,6 +62,24 @@ class HistoryWidget extends StatefulWidget {
 class _HistoryWidgetState extends State<HistoryWidget> {
   late Future<Pengguna> futurePengguna;
   late Future<Map<String, dynamic>> futureTransaksi;
+  final DateFormat formatter = DateFormat('MMMM yyyy');
+  DateTime? selectedDate;
+
+  Future<void> _pickMonthYear() async {
+    final now = DateTime.now();
+    final picked = await showMonthPicker(
+      context: context,
+      firstDate: DateTime(1990, 1),
+      lastDate: DateTime(now.year, 12),
+      initialDate: selectedDate ?? now,
+    );
+
+    if (picked != null) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
 
   Future<int?> getPenggunaIdFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
@@ -111,6 +138,92 @@ class _HistoryWidgetState extends State<HistoryWidget> {
     yield {'transaksi': transaksi};
   }
 
+  Future<void> exportExcel(List<Transaksi> transaksiList) async {
+    final xlsio.Workbook workbook = xlsio.Workbook();
+    final xlsio.Worksheet sheet = workbook.worksheets[0];
+
+    // Set header row
+    sheet.getRangeByName('A1').setText('Nomor');
+    sheet.getRangeByName('B1').setText('Tanggal');
+    sheet.getRangeByName('C1').setText('Jenis Transaksi');
+    sheet.getRangeByName('D1').setText('Judul Transaksi');
+    sheet.getRangeByName('E1').setText('Kategori');
+    sheet.getRangeByName('F1').setText('Nominal');
+    sheet.getRangeByName('G1').setText('Keterangan');
+
+    // Fill data into the worksheet
+    for (int i = 0; i < transaksiList.length; i++) {
+      final trx = transaksiList[i];
+      sheet.getRangeByIndex(i + 2, 1).setNumber(i + 1);
+      sheet.getRangeByIndex(i + 2, 2).setText(trx.tanggal ?? '');
+      sheet.getRangeByIndex(i + 2, 3).setText(trx.jenis_transaksi ?? '');
+      sheet.getRangeByIndex(i + 2, 4).setText(trx.judul_transaksi ?? '');
+      sheet.getRangeByIndex(i + 2, 5).setText(trx.kategori ?? '');
+      sheet.getRangeByIndex(i + 2, 6).setNumber((trx.nominal ?? 0).toDouble());
+      sheet.getRangeByIndex(i + 2, 7).setText(trx.keterangan ?? '');
+    }
+
+    final List<int> bytes = workbook.saveAsStream();
+    workbook.dispose();
+
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/transaksi.xlsx';
+
+    final File file = File(path);
+    await file.writeAsBytes(bytes, flush: true);
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Berhasil',
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+            ),
+            content: Text(
+              textAlign: TextAlign.center,
+              'Transaksi berhasil di export',
+              style: TextStyle(fontSize: 14),
+            ),
+            backgroundColor: Color(0xFFF9FCFF),
+            icon: Icon(
+              Icons.check_circle_outline,
+              color: Colors.green,
+              size: 55,
+            ),
+            actions: [
+              Center(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF4C75FF),
+                    foregroundColor: Colors.white,
+                    fixedSize: Size(
+                      MediaQuery.of(context).size.width * 0.3,
+                      40,
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('OK'),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
+  // Flutter web export excel
+  void downloadExcel(Uint8List bytes, String filename) {
+    final blob = html.Blob([bytes]);
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor =
+        html.AnchorElement(href: url)
+          ..setAttribute('download', filename)
+          ..click();
+    html.Url.revokeObjectUrl(url);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -129,7 +242,20 @@ class _HistoryWidgetState extends State<HistoryWidget> {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else {
-          final transaksiList = snapshot.data!['transaksi'] as List<Transaksi>;
+          final List<Transaksi> allTransaksi =
+              snapshot.data!['transaksi'] as List<Transaksi>;
+          final List<Transaksi> transaksiList =
+              selectedDate == null
+                  ? allTransaksi
+                  : allTransaksi.where((trx) {
+                    if (trx.tanggal != null) {
+                      final filter = DateTime.parse(trx.tanggal!);
+                      return filter.month == selectedDate!.month &&
+                          filter.year == selectedDate!.year;
+                    } else {
+                      return false;
+                    }
+                  }).toList();
           return Scaffold(
             backgroundColor: Colors.white,
             appBar: AppBar(
@@ -149,6 +275,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
               child: Container(
                 color: Color(0xFFFFFFFF),
                 child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
                   child: Column(
                     children: [
                       Padding(
@@ -156,31 +283,177 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                           horizontal: 20,
                           vertical: 10,
                         ),
-                        child: DateTimeFormField(
-                          canClear: true,
-                          dateFormat: DateFormat('dd MMM yyyy'),
-                          mode: DateTimeFieldPickerMode.date,
-                          decoration: InputDecoration(
-                            hintText: 'Pilih tanggal',
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.black),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: TextField(
+                                readOnly: true,
+                                onTap: _pickMonthYear,
+                                decoration: InputDecoration(
+                                  focusColor: Colors.black,
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.black),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.calendar_month_outlined,
+                                  ),
+                                  labelText: 'Pilih periode',
+                                  hintText: 'MM/YYYY',
+                                ),
+                                controller: TextEditingController(
+                                  text:
+                                      selectedDate != null
+                                          ? formatter.format(selectedDate!)
+                                          : '',
+                                ),
+                              ),
                             ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Color(0xFF4C75FF)),
+                            SizedBox(width: 10),
+                            IconButton(
+                              onPressed: () async {
+                                final transaksi =
+                                    selectedDate == null
+                                        ? allTransaksi
+                                        : allTransaksi.where((trx) {
+                                          if (trx.tanggal != null) {
+                                            final filter = DateTime.parse(
+                                              trx.tanggal!,
+                                            );
+                                            return filter.month ==
+                                                    selectedDate!.month &&
+                                                filter.year ==
+                                                    selectedDate!.year;
+                                          } else {
+                                            return false;
+                                          }
+                                        }).toList();
+
+                                if (kIsWeb) {
+                                  final xlsio.Workbook workbook =
+                                      xlsio.Workbook();
+                                  final xlsio.Worksheet sheet =
+                                      workbook.worksheets[0];
+                                  // Set header row
+                                  // Styling
+                                  final xlsio.Style globalStyle = workbook
+                                      .styles
+                                      .add('globalStyle');
+                                  globalStyle.borders.all.lineStyle =
+                                      xlsio.LineStyle.thin;
+                                  globalStyle.borders.all.color = '#000000';
+                                  sheet.getRangeByName('A1').cellStyle =
+                                      globalStyle;
+                                  sheet.getRangeByName('B1').cellStyle =
+                                      globalStyle;
+                                  sheet.getRangeByName('C1').cellStyle =
+                                      globalStyle;
+                                  sheet.getRangeByName('D1').cellStyle =
+                                      globalStyle;
+                                  sheet.getRangeByName('E1').cellStyle =
+                                      globalStyle;
+                                  sheet.getRangeByName('F1').cellStyle =
+                                      globalStyle;
+                                  sheet.getRangeByName('G1').cellStyle =
+                                      globalStyle;
+
+                                  sheet.getRangeByName('A1').cellStyle.bold =
+                                      true;
+                                  sheet.getRangeByName('B1').cellStyle.bold =
+                                      sheet
+                                          .getRangeByName('C1')
+                                          .cellStyle
+                                          .bold = true;
+                                  sheet.getRangeByName('D1').cellStyle.bold =
+                                      true;
+                                  sheet.getRangeByName('E1').cellStyle.bold =
+                                      true;
+                                  sheet.getRangeByName('F1').cellStyle.bold =
+                                      true;
+                                  sheet.getRangeByName('G1').cellStyle.bold =
+                                      true;
+                                  true;
+
+                                  sheet.getRangeByName('A1').setText('Nomor');
+                                  sheet.getRangeByName('B1').setText('Tanggal');
+                                  sheet
+                                      .getRangeByName('C1')
+                                      .setText('Jenis Transaksi');
+                                  sheet
+                                      .getRangeByName('D1')
+                                      .setText('Judul Transaksi');
+                                  sheet
+                                      .getRangeByName('E1')
+                                      .setText('Kategori');
+                                  sheet.getRangeByName('F1').setText('Nominal');
+                                  sheet
+                                      .getRangeByName('G1')
+                                      .setText('Keterangan');
+
+                                  // Fill data into the worksheet
+                                  for (
+                                    int i = 0;
+                                    i < transaksiList.length;
+                                    i++
+                                  ) {
+                                    final trx = transaksiList[i];
+                                    sheet.getRangeByIndex(i + 2, 1).cellStyle =
+                                        globalStyle;
+                                    sheet.getRangeByIndex(i + 2, 2).cellStyle =
+                                        globalStyle;
+                                    sheet.getRangeByIndex(i + 2, 3).cellStyle =
+                                        globalStyle;
+                                    sheet.getRangeByIndex(i + 2, 4).cellStyle =
+                                        globalStyle;
+                                    sheet.getRangeByIndex(i + 2, 5).cellStyle =
+                                        globalStyle;
+                                    sheet.getRangeByIndex(i + 2, 6).cellStyle =
+                                        globalStyle;
+                                    sheet.getRangeByIndex(i + 2, 7).cellStyle =
+                                        globalStyle;
+
+                                    sheet
+                                        .getRangeByIndex(i + 2, 1)
+                                        .setNumber(i + 1);
+                                    sheet
+                                        .getRangeByIndex(i + 2, 2)
+                                        .setText(trx.tanggal ?? '');
+                                    sheet
+                                        .getRangeByIndex(i + 2, 3)
+                                        .setText(trx.jenis_transaksi ?? '');
+                                    sheet
+                                        .getRangeByIndex(i + 2, 4)
+                                        .setText(trx.judul_transaksi ?? '');
+                                    sheet
+                                        .getRangeByIndex(i + 2, 5)
+                                        .setText(trx.kategori ?? '');
+                                    sheet
+                                        .getRangeByIndex(i + 2, 6)
+                                        .setNumber(
+                                          (trx.nominal ?? 0).toDouble(),
+                                        );
+                                    sheet
+                                        .getRangeByIndex(i + 2, 7)
+                                        .setText(trx.keterangan ?? '-');
+                                  }
+
+                                  final List<int> bytes =
+                                      workbook.saveAsStream();
+                                  workbook.dispose();
+                                  downloadExcel(
+                                    Uint8List.fromList(bytes),
+                                    'transaksi.xlsx',
+                                  );
+                                } else {
+                                  await exportExcel(transaksi);
+                                }
+                              },
+                              icon: Icon(Icons.file_download_outlined),
+                              iconSize: 28,
+                              tooltip: 'Export Excel',
                             ),
-                          ),
-                          firstDate: DateTime.now().subtract(
-                            Duration(days: 10950),
-                          ),
-                          lastDate: DateTime.now().add(Duration(days: 0)),
-                          initialPickerDateTime: DateTime.now(),
-                          onChanged: (value) {
-                            // setState(() {
-                            //   _selectedDate = value;
-                            // });
-                          },
+                          ],
                         ),
                       ),
                       transaksiList.isEmpty
