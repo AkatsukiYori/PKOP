@@ -31,7 +31,7 @@ class _PengaturanWidgetState extends State<PengaturanWidget> {
   Future<Pengguna> fetchPengguna(int id) async {
     final response = await http.get(
       Uri.parse(
-        'http://localhost/backend_project_rpl/select/pengguna.php?id=$id',
+        'http://10.0.2.2/backend_project_rpl/select/pengguna.php?id=$id',
       ),
     );
 
@@ -55,7 +55,7 @@ class _PengaturanWidgetState extends State<PengaturanWidget> {
     }
 
     final url = Uri.parse(
-      'http://localhost/backend_project_rpl/crud/update_profile.php',
+      'http://10.0.2.2/backend_project_rpl/crud/update_profile.php',
     );
     final response = await http.post(
       url,

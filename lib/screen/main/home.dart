@@ -11,28 +11,50 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
-  var index = 0;
+  var currentIndex = 0;
+  final PageController _pageController = PageController();
+  final List<Widget> halaman = [
+    DashboardWidget(),
+    TransaksiWidget(),
+    ProfileWidget(),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> halaman = [
-      DashboardWidget(),
-      TransaksiWidget(),
-      ProfileWidget(),
-    ];
-
     return Scaffold(
       backgroundColor: Colors.white,
-      body: halaman[index],
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            currentIndex = index;
+          });
+
+          if (index == 0) {
+            dashboardKey.currentState!.refreshDashboard();
+          }
+        },
+        children: [
+          DashboardWidget(key: dashboardKey),
+          TransaksiWidget(),
+          ProfileWidget(),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Color(0xFFFFFFFF),
         selectedItemColor: Color(0xFF4C75FF),
         unselectedItemColor: Color(0xFF9BA3AE),
-        currentIndex: index,
-        onTap: (value) {
+        currentIndex: currentIndex,
+        onTap: (index) {
           setState(() {
-            index = value;
+            currentIndex = index;
           });
+          _pageController.jumpToPage(index);
         },
         iconSize: 30,
         items: [
@@ -52,4 +74,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       ),
     );
   }
+
+  final GlobalKey<DashboardWidgetState> dashboardKey =
+      GlobalKey<DashboardWidgetState>();
 }

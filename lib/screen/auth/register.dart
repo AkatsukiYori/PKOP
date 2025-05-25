@@ -18,7 +18,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
 
   Future<void> _register() async {
     final url = Uri.parse(
-      'http://localhost/backend_project_rpl/auth/register.php',
+      'http://10.0.2.2/backend_project_rpl/auth/register.php',
     );
 
     final response = await http.post(

@@ -61,7 +61,7 @@ class _LoginWidgetState extends State<LoginWidget> {
     }
 
     final url = Uri.parse(
-      'http://localhost/backend_project_rpl/auth/login.php',
+      'http://10.0.2.2/backend_project_rpl/auth/login.php',
     );
 
     final response = await http.post(
@@ -278,17 +278,19 @@ class _LoginWidgetState extends State<LoginWidget> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                onPressed: _login,
+                onPressed: () {
+                  _login();
+                },
                 child: Text(
                   'Log In',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
-              SizedBox(height: 12),
+              SizedBox(height: 5),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Apakah anda belum memiliki akun?'),
+                  Text('Belum punya akun?'),
                   TextButton(
                     onPressed: () {
                       Navigator.push(

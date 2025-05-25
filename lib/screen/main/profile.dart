@@ -14,8 +14,8 @@ class Pengguna {
   final String password;
   final String email;
   final String nomor_hp;
-  final double pemasukan;
-  final double pengeluaran;
+  final int pemasukan;
+  final int pengeluaran;
 
   Pengguna({
     required this.id,
@@ -59,7 +59,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
       final id = await getPenggunaIdFromPrefs();
       final response = await http.get(
         Uri.parse(
-          'http://localhost/backend_project_rpl/select/pengguna.php?id=$id',
+          'http://10.0.2.2/backend_project_rpl/select/pengguna.php?id=$id',
         ),
       );
 
@@ -100,7 +100,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
               symbol: 'Rp',
             ).format(pengguna.pengeluaran);
             return Padding(
-              padding: EdgeInsets.symmetric(horizontal: 55, vertical: 30),
+              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 30),
               child: Container(
                 width: MediaQuery.of(context).size.width * 1,
                 color: Color(0xFFFFFFFF),
@@ -137,7 +137,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                     SizedBox(height: 20),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 1,
-                      height: MediaQuery.of(context).size.height * 0.34,
+                      height: MediaQuery.of(context).size.height * 0.35,
                       child: Container(
                         decoration: BoxDecoration(
                           color: Color(0x55DBEBFF),

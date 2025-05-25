@@ -47,13 +47,13 @@ class Transaksi {
 }
 
 class DashboardWidget extends StatefulWidget {
-  const DashboardWidget({super.key});
+  const DashboardWidget({Key? key}) : super(key: key);
 
   @override
-  State<DashboardWidget> createState() => _DashboardWidgetState();
+  DashboardWidgetState createState() => DashboardWidgetState();
 }
 
-class _DashboardWidgetState extends State<DashboardWidget> {
+class DashboardWidgetState extends State<DashboardWidget> {
   late Future<Pengguna> futurePengguna;
   late Future<Map<String, dynamic>> combineFuture;
   Future<int?> getPenggunaIdFromPrefs() async {
@@ -64,7 +64,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   Future<Pengguna> fetchPengguna(int id) async {
     final response = await http.get(
       Uri.parse(
-        'http://localhost/backend_project_rpl/select/pengguna.php?id=$id',
+        'http://10.0.2.2/backend_project_rpl/select/pengguna.php?id=$id',
       ),
     );
 
@@ -83,7 +83,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
     final response = await http.get(
       Uri.parse(
-        'http://localhost/backend_project_rpl/select/get_transaksi.php?id=$pengguna_id&limit=true',
+        'http://10.0.2.2/backend_project_rpl/select/get_transaksi.php?id=$pengguna_id&limit=true',
       ),
     );
 
@@ -103,7 +103,15 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     }
   }
 
-  Stream<Map<String, dynamic>> getCombineData(Duration interval) async* {
+  Future<Map<String, dynamic>> loadData() async {
+    final pengguna_id = await getPenggunaIdFromPrefs();
+    if (pengguna_id == null) throw Exception('ID tidak ditemukan');
+    final pengguna = await fetchPengguna(pengguna_id);
+    final transaksi = await fetchTransaksi(pengguna_id);
+    return {'pengguna': pengguna, 'transaksi': transaksi};
+  }
+
+  Future<Map<String, dynamic>> getCombineData() async {
     final pengguna_id = await getPenggunaIdFromPrefs();
     if (pengguna_id == null) {
       throw Exception('ID tidak ditemukan');
@@ -111,7 +119,85 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
     final pengguna = await fetchPengguna(pengguna_id);
     final transaksi = await fetchTransaksi(pengguna_id);
-    yield {'pengguna': pengguna, 'transaksi': transaksi};
+    return {'pengguna': pengguna, 'transaksi': transaksi};
+  }
+
+  List<BarChartGroupData> generateBarChartData(List<Transaksi> transaksiList) {
+    final Map<int, Map<String, double>> mingguData = {
+      0: {'pemasukan': 0, 'pengeluaran': 0},
+      1: {'pemasukan': 0, 'pengeluaran': 0},
+      2: {'pemasukan': 0, 'pengeluaran': 0},
+      3: {'pemasukan': 0, 'pengeluaran': 0},
+    };
+
+    for (var trx in transaksiList) {
+      if (trx.tanggal != null &&
+          trx.nominal != null &&
+          trx.jenis_transaksi != null) {
+        DateTime tanggal = DateTime.parse(trx.tanggal!);
+        int minggu = ((tanggal.day - 1) / 7).floor().clamp(0, 3);
+
+        if (trx.jenis_transaksi == 'pemasukan') {
+          mingguData[minggu]!['pemasukan'] =
+              mingguData[minggu]!['pemasukan']! + trx.nominal!;
+        } else if (trx.jenis_transaksi == 'pengeluaran') {
+          mingguData[minggu]!['pengeluaran'] =
+              mingguData[minggu]!['pengeluaran']! + trx.nominal!;
+        }
+      }
+    }
+
+    return List.generate(4, (index) {
+      final pemasukan = mingguData[index]!['pemasukan'] ?? 0;
+      final pengeluaran = mingguData[index]!['pengeluaran'] ?? 0;
+      return makeGroupData(index, pemasukan, pengeluaran);
+    });
+  }
+
+  double getMaxY(List<Transaksi> transaksiList) {
+    double maxNominal = 0;
+    final Map<int, double> mingguanPemasukan = {0: 0, 1: 0, 2: 0, 3: 0};
+    final Map<int, double> mingguanPengeluaran = {0: 0, 1: 0, 2: 0, 3: 0};
+    for (var trx in transaksiList) {
+      if (trx.nominal != null && trx.tanggal != null) {
+        final minggu = ((DateTime.parse(trx.tanggal!).day - 1) / 7)
+            .floor()
+            .clamp(0, 3);
+        if (trx.jenis_transaksi == 'pemasukan') {
+          mingguanPemasukan[minggu] = mingguanPemasukan[minggu]! + trx.nominal!;
+        } else {
+          mingguanPengeluaran[minggu] =
+              mingguanPengeluaran[minggu]! + trx.nominal!;
+        }
+      }
+    }
+
+    for (int i = 0; i < 4; i++) {
+      final tertinggi =
+          (mingguanPemasukan[i]! > mingguanPengeluaran[i]!)
+              ? mingguanPemasukan[i]!
+              : mingguanPengeluaran[i]!;
+
+      if (tertinggi > maxNominal) {
+        maxNominal = tertinggi;
+      }
+    }
+
+    return (maxNominal).ceilToDouble() + 5;
+  }
+
+  String formatRupiah(num data) {
+    if (data >= 10000000) {
+      return '${(data / 1000000).toStringAsFixed(1)}M';
+    } else if (data >= 1000000) {
+      return '${(data / 1000000).toStringAsFixed(1)}jt';
+    } else if (data >= 100000) {
+      return '${(data / 1000).toStringAsFixed(1)}K';
+    } else if (data >= 10000) {
+      return '${(data / 1000).toStringAsFixed(1)}K';
+    } else {
+      return data.toString();
+    }
   }
 
   @override
@@ -121,11 +207,19 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       if (id == null) throw Exception('ID tidak ditemukan');
       return fetchPengguna(id);
     });
+
+    combineFuture = getCombineData();
+  }
+
+  void refreshDashboard() {
+    setState(() {
+      combineFuture = getCombineData();
+    });
   }
 
   Widget build(BuildContext context) {
-    return StreamBuilder<Map<String, dynamic>>(
-      stream: getCombineData(Duration(seconds: 1)),
+    return FutureBuilder<Map<String, dynamic>>(
+      future: combineFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -206,7 +300,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                         ),
                                       ),
                                       Text(
-                                        'Mei 2025',
+                                        '${DateFormat('MMMM yyyy').format(DateTime.now())}',
                                         style: TextStyle(
                                           fontWeight: FontWeight.w500,
                                           color: Color(0xDD9BA3AE),
@@ -217,14 +311,16 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                 ),
                               ),
                               Padding(
-                                padding: EdgeInsets.only(left: 20),
+                                padding: EdgeInsets.only(left: 20, right: 20),
                                 child: Card(
                                   elevation: 2,
                                   color: Color(0xFFFFFFFF),
                                   child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: 15,
-                                      horizontal: 10,
+                                    padding: EdgeInsets.only(
+                                      left: 10,
+                                      right: 10,
+                                      top: 32,
+                                      bottom: 15,
                                     ),
                                     child: SizedBox(
                                       height: 300,
@@ -233,13 +329,27 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                           alignment:
                                               BarChartAlignment.spaceAround,
                                           gridData: FlGridData(show: false),
-                                          maxY: 30,
+                                          maxY: getMaxY(transaksiList),
                                           barTouchData: BarTouchData(
                                             enabled: true,
                                             touchTooltipData:
                                                 BarTouchTooltipData(
                                                   tooltipBgColor:
                                                       Colors.grey[100],
+                                                  getTooltipItem: (
+                                                    group,
+                                                    groupIndex,
+                                                    rod,
+                                                    rodIndex,
+                                                  ) {
+                                                    final value = rod.toY;
+                                                    return BarTooltipItem(
+                                                      formatRupiah(value),
+                                                      TextStyle(
+                                                        color: Colors.black,
+                                                      ),
+                                                    );
+                                                  },
                                                 ),
                                           ),
                                           titlesData: FlTitlesData(
@@ -252,8 +362,15 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                             leftTitles: AxisTitles(
                                               sideTitles: SideTitles(
                                                 showTitles: true,
-                                                reservedSize: 30,
-                                                interval: 5,
+                                                reservedSize: 40,
+                                                getTitlesWidget: (value, meta) {
+                                                  return Text(
+                                                    formatRupiah(value),
+                                                    style: TextStyle(
+                                                      fontSize: 10,
+                                                    ),
+                                                  );
+                                                },
                                               ),
                                             ),
                                             rightTitles: AxisTitles(
@@ -268,12 +385,9 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                             ),
                                           ),
                                           borderData: FlBorderData(show: false),
-                                          barGroups: [
-                                            makeGroupData(0, 8, 13),
-                                            makeGroupData(1, 12, 15),
-                                            makeGroupData(2, 16, 5),
-                                            makeGroupData(3, 21, 10),
-                                          ],
+                                          barGroups: generateBarChartData(
+                                            transaksiList,
+                                          ),
                                         ),
                                       ),
                                     ),

@@ -31,7 +31,7 @@ class _UbahPasswordWidgetState extends State<UbahPasswordWidget> {
   Future<Pengguna> fetchPengguna(int id) async {
     final response = await http.get(
       Uri.parse(
-        'http://localhost/backend_project_rpl/select/pengguna.php?id=$id',
+        'http://10.0.2.2/backend_project_rpl/select/pengguna.php?id=$id',
       ),
     );
 
@@ -55,7 +55,7 @@ class _UbahPasswordWidgetState extends State<UbahPasswordWidget> {
     }
 
     final url = Uri.parse(
-      'http://localhost/backend_project_rpl/crud/ubah_password.php',
+      'http://10.0.2.2/backend_project_rpl/crud/ubah_password.php',
     );
     final response = await http.post(
       url,

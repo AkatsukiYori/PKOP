@@ -8,9 +8,9 @@ import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'dart:html' as html;
-import 'dart:typed_data';
-import 'package:flutter/foundation.dart';
+// import 'dart:html' as html;
+// import 'dart:typed_data';
+// import 'package:flutter/foundation.dart';
 
 class Pengguna {
   final String username;
@@ -89,7 +89,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
   Future<Pengguna> fetchPengguna(int id) async {
     final response = await http.get(
       Uri.parse(
-        'http://localhost/backend_project_rpl/select/pengguna.php?id=$id',
+        'http://10.0.2.2/backend_project_rpl/select/pengguna.php?id=$id',
       ),
     );
 
@@ -108,7 +108,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
 
     final response = await http.get(
       Uri.parse(
-        'http://localhost/backend_project_rpl/select/get_transaksi.php?id=$pengguna_id&limit=false',
+        'http://10.0.2.2/backend_project_rpl/select/get_transaksi.php?id=$pengguna_id&limit=false',
       ),
     );
 
@@ -214,15 +214,14 @@ class _HistoryWidgetState extends State<HistoryWidget> {
   }
 
   // Flutter web export excel
-  void downloadExcel(Uint8List bytes, String filename) {
-    final blob = html.Blob([bytes]);
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    final anchor =
-        html.AnchorElement(href: url)
-          ..setAttribute('download', filename)
-          ..click();
-    html.Url.revokeObjectUrl(url);
-  }
+  // void downloadExcel(Uint8List bytes, String filename) {
+  //   final blob = html.Blob([bytes]);
+  //   final url = html.Url.createObjectUrlFromBlob(blob);
+  //   html.AnchorElement(href: url)
+  //     ..setAttribute('download', filename)
+  //     ..click();
+  //   html.Url.revokeObjectUrl(url);
+  // }
 
   @override
   void initState() {
@@ -330,124 +329,124 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                           }
                                         }).toList();
 
-                                if (kIsWeb) {
-                                  final xlsio.Workbook workbook =
-                                      xlsio.Workbook();
-                                  final xlsio.Worksheet sheet =
-                                      workbook.worksheets[0];
-                                  // Set header row
-                                  // Styling
-                                  final xlsio.Style globalStyle = workbook
-                                      .styles
-                                      .add('globalStyle');
-                                  globalStyle.borders.all.lineStyle =
-                                      xlsio.LineStyle.thin;
-                                  globalStyle.borders.all.color = '#000000';
-                                  sheet.getRangeByName('A1').cellStyle =
-                                      globalStyle;
-                                  sheet.getRangeByName('B1').cellStyle =
-                                      globalStyle;
-                                  sheet.getRangeByName('C1').cellStyle =
-                                      globalStyle;
-                                  sheet.getRangeByName('D1').cellStyle =
-                                      globalStyle;
-                                  sheet.getRangeByName('E1').cellStyle =
-                                      globalStyle;
-                                  sheet.getRangeByName('F1').cellStyle =
-                                      globalStyle;
-                                  sheet.getRangeByName('G1').cellStyle =
-                                      globalStyle;
+                                // if (kIsWeb) {
+                                //   final xlsio.Workbook workbook =
+                                //       xlsio.Workbook();
+                                //   final xlsio.Worksheet sheet =
+                                //       workbook.worksheets[0];
+                                //   // Set header row
+                                //   // Styling
+                                //   final xlsio.Style globalStyle = workbook
+                                //       .styles
+                                //       .add('globalStyle');
+                                //   globalStyle.borders.all.lineStyle =
+                                //       xlsio.LineStyle.thin;
+                                //   globalStyle.borders.all.color = '#000000';
+                                //   sheet.getRangeByName('A1').cellStyle =
+                                //       globalStyle;
+                                //   sheet.getRangeByName('B1').cellStyle =
+                                //       globalStyle;
+                                //   sheet.getRangeByName('C1').cellStyle =
+                                //       globalStyle;
+                                //   sheet.getRangeByName('D1').cellStyle =
+                                //       globalStyle;
+                                //   sheet.getRangeByName('E1').cellStyle =
+                                //       globalStyle;
+                                //   sheet.getRangeByName('F1').cellStyle =
+                                //       globalStyle;
+                                //   sheet.getRangeByName('G1').cellStyle =
+                                //       globalStyle;
 
-                                  sheet.getRangeByName('A1').cellStyle.bold =
-                                      true;
-                                  sheet.getRangeByName('B1').cellStyle.bold =
-                                      sheet
-                                          .getRangeByName('C1')
-                                          .cellStyle
-                                          .bold = true;
-                                  sheet.getRangeByName('D1').cellStyle.bold =
-                                      true;
-                                  sheet.getRangeByName('E1').cellStyle.bold =
-                                      true;
-                                  sheet.getRangeByName('F1').cellStyle.bold =
-                                      true;
-                                  sheet.getRangeByName('G1').cellStyle.bold =
-                                      true;
-                                  true;
+                                //   sheet.getRangeByName('A1').cellStyle.bold =
+                                //       true;
+                                //   sheet.getRangeByName('B1').cellStyle.bold =
+                                //       sheet
+                                //           .getRangeByName('C1')
+                                //           .cellStyle
+                                //           .bold = true;
+                                //   sheet.getRangeByName('D1').cellStyle.bold =
+                                //       true;
+                                //   sheet.getRangeByName('E1').cellStyle.bold =
+                                //       true;
+                                //   sheet.getRangeByName('F1').cellStyle.bold =
+                                //       true;
+                                //   sheet.getRangeByName('G1').cellStyle.bold =
+                                //       true;
+                                //   true;
 
-                                  sheet.getRangeByName('A1').setText('Nomor');
-                                  sheet.getRangeByName('B1').setText('Tanggal');
-                                  sheet
-                                      .getRangeByName('C1')
-                                      .setText('Jenis Transaksi');
-                                  sheet
-                                      .getRangeByName('D1')
-                                      .setText('Judul Transaksi');
-                                  sheet
-                                      .getRangeByName('E1')
-                                      .setText('Kategori');
-                                  sheet.getRangeByName('F1').setText('Nominal');
-                                  sheet
-                                      .getRangeByName('G1')
-                                      .setText('Keterangan');
+                                //   sheet.getRangeByName('A1').setText('Nomor');
+                                //   sheet.getRangeByName('B1').setText('Tanggal');
+                                //   sheet
+                                //       .getRangeByName('C1')
+                                //       .setText('Jenis Transaksi');
+                                //   sheet
+                                //       .getRangeByName('D1')
+                                //       .setText('Judul Transaksi');
+                                //   sheet
+                                //       .getRangeByName('E1')
+                                //       .setText('Kategori');
+                                //   sheet.getRangeByName('F1').setText('Nominal');
+                                //   sheet
+                                //       .getRangeByName('G1')
+                                //       .setText('Keterangan');
 
-                                  // Fill data into the worksheet
-                                  for (
-                                    int i = 0;
-                                    i < transaksiList.length;
-                                    i++
-                                  ) {
-                                    final trx = transaksiList[i];
-                                    sheet.getRangeByIndex(i + 2, 1).cellStyle =
-                                        globalStyle;
-                                    sheet.getRangeByIndex(i + 2, 2).cellStyle =
-                                        globalStyle;
-                                    sheet.getRangeByIndex(i + 2, 3).cellStyle =
-                                        globalStyle;
-                                    sheet.getRangeByIndex(i + 2, 4).cellStyle =
-                                        globalStyle;
-                                    sheet.getRangeByIndex(i + 2, 5).cellStyle =
-                                        globalStyle;
-                                    sheet.getRangeByIndex(i + 2, 6).cellStyle =
-                                        globalStyle;
-                                    sheet.getRangeByIndex(i + 2, 7).cellStyle =
-                                        globalStyle;
+                                //   // Fill data into the worksheet
+                                //   for (
+                                //     int i = 0;
+                                //     i < transaksiList.length;
+                                //     i++
+                                //   ) {
+                                //     final trx = transaksiList[i];
+                                //     sheet.getRangeByIndex(i + 2, 1).cellStyle =
+                                //         globalStyle;
+                                //     sheet.getRangeByIndex(i + 2, 2).cellStyle =
+                                //         globalStyle;
+                                //     sheet.getRangeByIndex(i + 2, 3).cellStyle =
+                                //         globalStyle;
+                                //     sheet.getRangeByIndex(i + 2, 4).cellStyle =
+                                //         globalStyle;
+                                //     sheet.getRangeByIndex(i + 2, 5).cellStyle =
+                                //         globalStyle;
+                                //     sheet.getRangeByIndex(i + 2, 6).cellStyle =
+                                //         globalStyle;
+                                //     sheet.getRangeByIndex(i + 2, 7).cellStyle =
+                                //         globalStyle;
 
-                                    sheet
-                                        .getRangeByIndex(i + 2, 1)
-                                        .setNumber(i + 1);
-                                    sheet
-                                        .getRangeByIndex(i + 2, 2)
-                                        .setText(trx.tanggal ?? '');
-                                    sheet
-                                        .getRangeByIndex(i + 2, 3)
-                                        .setText(trx.jenis_transaksi ?? '');
-                                    sheet
-                                        .getRangeByIndex(i + 2, 4)
-                                        .setText(trx.judul_transaksi ?? '');
-                                    sheet
-                                        .getRangeByIndex(i + 2, 5)
-                                        .setText(trx.kategori ?? '');
-                                    sheet
-                                        .getRangeByIndex(i + 2, 6)
-                                        .setNumber(
-                                          (trx.nominal ?? 0).toDouble(),
-                                        );
-                                    sheet
-                                        .getRangeByIndex(i + 2, 7)
-                                        .setText(trx.keterangan ?? '-');
-                                  }
+                                //     sheet
+                                //         .getRangeByIndex(i + 2, 1)
+                                //         .setNumber(i + 1);
+                                //     sheet
+                                //         .getRangeByIndex(i + 2, 2)
+                                //         .setText(trx.tanggal ?? '');
+                                //     sheet
+                                //         .getRangeByIndex(i + 2, 3)
+                                //         .setText(trx.jenis_transaksi ?? '');
+                                //     sheet
+                                //         .getRangeByIndex(i + 2, 4)
+                                //         .setText(trx.judul_transaksi ?? '');
+                                //     sheet
+                                //         .getRangeByIndex(i + 2, 5)
+                                //         .setText(trx.kategori ?? '');
+                                //     sheet
+                                //         .getRangeByIndex(i + 2, 6)
+                                //         .setNumber(
+                                //           (trx.nominal ?? 0).toDouble(),
+                                //         );
+                                //     sheet
+                                //         .getRangeByIndex(i + 2, 7)
+                                //         .setText(trx.keterangan ?? '-');
+                                //   }
 
-                                  final List<int> bytes =
-                                      workbook.saveAsStream();
-                                  workbook.dispose();
-                                  downloadExcel(
-                                    Uint8List.fromList(bytes),
-                                    'transaksi.xlsx',
-                                  );
-                                } else {
+                                //   final List<int> bytes =
+                                //       workbook.saveAsStream();
+                                //   workbook.dispose();
+                                //   downloadExcel(
+                                //     Uint8List.fromList(bytes),
+                                //     'transaksi.xlsx',
+                                //   );
+                                // } else {
                                   await exportExcel(transaksi);
-                                }
+                                // }
                               },
                               icon: Icon(Icons.file_download_outlined),
                               iconSize: 28,
